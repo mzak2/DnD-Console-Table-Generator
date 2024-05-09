@@ -21,7 +21,7 @@ public class Main {
         Connection connection = DriverManager.getConnection(DB_URL, USER, PASS);
         connection.setAutoCommit(true);
 
-
+        //test comment
         //------------START PROGRAM-------------
         //TODO fix placeholder for category list to be selectable
         int count = 0;
