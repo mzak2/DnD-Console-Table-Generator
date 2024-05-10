@@ -40,10 +40,19 @@ public class Subcategory {
         this.name = name;
     }
 
-    public static String getSubcategoryTable(Subcategory subcategory){
 
+    public static String getSubcategoryTable(Subcategory subcategory){
         String[] tableName = subcategory.getName().split("\\s+");
+
+        if(subcategory.getName().trim().toLowerCase().equals("magic")) {
+            return "magic_items";
+        } else if(subcategory.getName().trim().toLowerCase().equals("town")) {
+            return "town_events";
+        }
+
         return tableName[0].toLowerCase();
     }
+
+
 }
 

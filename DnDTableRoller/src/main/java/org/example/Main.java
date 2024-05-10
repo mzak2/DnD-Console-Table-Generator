@@ -26,13 +26,14 @@ public class Main {
         connection.setAutoCommit(true);
 
         //TODO fix magic_items, currently rolls as "magic"
-        //TODO tables to add
+        //TODO tables to add content (non-placeholder for)
         //CIVILIZATION//Castles and Keeps//Churches//Cities//Town events//Villages//graveyards
         //WILDERNESS //Travel setbacks
-        //CHARACTERS//Adventurers//Arcane (npcs)//BBEG//monsters//nobles//priests//random npcs//villagers
+        //CHARACTERS//Adventurers//Arcane (npcs)//BBEG//monsters (w/ lair actions)//nobles//priests//random npcs//villagers
         //ENCHANTMENTS//blessings//curses//Divinations and fortunes
         //FLAVOR//melee combat//nightmares//spell casting//potions
 
+        //TODO specific logic for magic_items, potions, town_events, travel_setbacks, CHARACTERS, ENCHANTMENTS
 
         //------------START PROGRAM-------------
         // Populate our subcategories to our categories
@@ -43,10 +44,8 @@ public class Main {
         }
 
         while (true) {
-            //TODO add logic to give options for every subcategory
-            //TODO add logic to roll tables like Items without printing to console
             // Print categories
-            // put consoleStartApp into own controller/services
+            //TODO put consoleStartApp into own controller/services
             System.out.println("What Category would you like to select?");
             for (Category category : getCategories(connection)){
                 System.out.println(category.getCategory_id() + ". " + category.getCategory_name());
@@ -105,8 +104,16 @@ public class Main {
 
                         if (subcategory.getCategory_id() == 2) {
                             rollWilderness(connection, chosenTable);
-                        } else if (chosenTable.equals("durations") || chosenTable.equals("magic_items")) {
-                            rollTable(connection, chosenTable, "description");
+                        } else if(subcategory.getCategory_id() == 1 && !chosenTable.equals("town")) {
+                            rollCivilization(connection, chosenTable);
+                        } else if (chosenTable.equals("potions")) {
+                            rollPotions(connection);
+                        } else if (chosenTable.equals("magic")){ //(subcategory.getId() == 29) {
+                            //TODO BUG we want it to equal magic_items not magic when checking, but still returns "magic"
+                            rollMagicItems(connection);
+                        }else if (chosenTable.equals("town")){ //(subcategory.getId() == 4) {
+                            //TODO BUG we want it to equal town_events not town when checking, but still returns "town"
+                            rollTownEvent(connection);
                         } else {
                             rollTable(connection, chosenTable, "name");
                         }
@@ -123,9 +130,6 @@ public class Main {
             }
         }
 
-
-
         connection.close();
     }
-
 }
