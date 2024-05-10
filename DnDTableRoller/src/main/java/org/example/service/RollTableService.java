@@ -1,9 +1,14 @@
 package org.example.service;
 
+import org.example.domain.Category;
+import org.example.domain.Subcategory;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class RollTableService {
@@ -60,7 +65,7 @@ public class RollTableService {
         } else {
             do{
                 result = rs.getString(column);
-                //System.out.println("Description: " + result);
+                System.out.println(table + ": " + result);
             } while (rs.next());
         }
 
@@ -78,5 +83,67 @@ public class RollTableService {
 
         statement.close();
         return maxId + 1;
+    }
+
+    public static List<Category> getCategories(Connection connection) throws SQLException {
+        List<Category> categories = new ArrayList<>();
+
+        Statement statement = connection.createStatement();
+        ResultSet rs = statement.executeQuery("SELECT * FROM categories");
+
+        if(!rs.next()){
+            System.out.println("Could not find data in Categories!");
+        } else {
+            do {
+                int category_id = rs.getInt("category_id");
+                String category_name = rs.getString("category_name");
+                Category category = new Category(category_id, category_name);
+                category.addSubcategory(connection);
+                categories.add(category);
+            } while (rs.next());
+        }
+
+        return  categories;
+    }
+
+    public static Category getCategory(Connection connection, int categoryId) throws  SQLException{
+        Category category = null;
+
+        Statement statement = connection.createStatement();
+        ResultSet rs = statement.executeQuery("SELECT * FROM categories WHERE category_id = " + categoryId);
+
+        if(!rs.next()){
+            System.out.println("There is no category matching " + categoryId);
+        } else {
+            do {
+                int category_id = rs.getInt("category_id");
+                String category_name = rs.getString("category_name");
+                category = new Category(category_id, category_name);
+                category.addSubcategory(connection);
+            } while (rs.next());
+        }
+
+        return category;
+    }
+
+    public static Subcategory getSubcategory(Connection connection, int subcategoryId) throws SQLException {
+        Subcategory subcategory = null;
+
+        Statement statement = connection.createStatement();
+        ResultSet rs = statement.executeQuery("SELECT * FROM sub_categories WHERE id = " + subcategoryId);
+
+        if(!rs.next()){
+            System.out.println("There is no subcategory that matches this id: " + subcategoryId);
+        } else {
+            do {
+                String sub_name = rs.getString("name");
+                int sub_id = rs.getInt("id");
+                int cat_id = rs.getInt("category_id");
+                subcategory = new Subcategory(sub_id, sub_name, cat_id);
+
+            } while (rs.next());
+        }
+
+        return subcategory;
     }
 }

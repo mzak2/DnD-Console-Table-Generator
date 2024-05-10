@@ -1,12 +1,15 @@
 package org.example;
 
 
+import org.example.domain.Category;
+import org.example.domain.Subcategory;
+
 import java.sql.*;
+import java.util.List;
 import java.util.Scanner;
 
-import static org.example.domain.CategoryClass.Category.getCategories;
-import static org.example.service.RollTableService.rollTable;
-import static org.example.service.RollTableService.rollWilderness;
+import static org.example.domain.Subcategory.getSubcategoryTable;
+import static org.example.service.RollTableService.*;
 
 public class Main {
     public static void main(String[] args) throws SQLException {
@@ -21,35 +24,81 @@ public class Main {
         Connection connection = DriverManager.getConnection(DB_URL, USER, PASS);
         connection.setAutoCommit(true);
 
-        //test comment
         //------------START PROGRAM-------------
-        //TODO fix placeholder for category list to be selectable
-        int count = 0;
-        for (String category : getCategories(connection)){
-            count++;
-            System.out.println(count + ". " + category);
+        // Populate our subcategories to our categories
+        for(Category category : getCategories(connection)){
+            if(category.getSubcategories() == null || category.getSubcategories().isEmpty()) {
+                category.addSubcategory(connection);
+            }
         }
 
-        while (true){
+        while (true) {
             //TODO add logic to give options for every subcategory
-            System.out.println("What table would you like to roll on?");
-            System.out.println("1. Deserts");
             //TODO add logic to roll tables like Items without printing to console
-            System.out.println("2. Items");
-            System.out.println("3. Exit");
+            // Print categories
+            System.out.println("What Category would you like to select?");
+            for (Category category : getCategories(connection)){
+                System.out.println(category.getCategory_id() + ". " + category.getCategory_name());
+            }
+            System.out.println("100. Exit");
+
             String user_input = scanner.nextLine();
-            if(user_input.toLowerCase().trim().equals("1") || user_input.toLowerCase().trim().equals("1.")){
-                System.out.println();
-                rollWilderness(connection, "deserts");
-                System.out.println();
-            } else if(user_input.toLowerCase().trim().equals("2") || user_input.toLowerCase().trim().equals("2.")) {
-                rollTable(connection, "items", "name");
-            } else if(user_input.toLowerCase().trim().equals("3") || user_input.toLowerCase().trim().equals("3.") || user_input.toLowerCase().trim().equals("exit")) {
-                break;
+            int user_num = 0;
+            Category categoryChosen = null;
+
+            try {
+                user_num = Integer.parseInt(user_input);
+            } catch (NumberFormatException e){
+                user_num = 0;
+                e.printStackTrace();
+            }
+
+            if (user_num > 0 && user_num != 100) {
+                categoryChosen = getCategory(connection, user_num);
+
+                // Loop for subcategories
+                while (true) {
+                    System.out.println("You selected " + categoryChosen.getCategory_name() + "\n Please Select from the following tables:");
+                    List<Subcategory> subcategories = categoryChosen.getSubcategories();
+                    for (Subcategory subcategory : subcategories) {
+                        System.out.println("\t" + subcategory.getId() + ". " + subcategory.getName());
+                    }
+                    System.out.println("100. Back");
+
+                    // Ask user which subcategory they want
+                    user_input = scanner.nextLine();
+
+                    try {
+                        user_num = Integer.parseInt(user_input);
+                    } catch (NumberFormatException e){
+                        user_num = 0;
+                        e.printStackTrace();
+                    }
+
+                    if (user_num > 0 && user_num != 100) {
+                        Subcategory subcategory = getSubcategory(connection, user_num);
+                        String chosenTable = getSubcategoryTable(subcategory);
+
+                        if (subcategory.getCategory_id() == 2) {
+                            rollWilderness(connection, chosenTable);
+                        } else if (chosenTable.equals("durations") || chosenTable.equals("magic_items")) {
+                            rollTable(connection, chosenTable, "description");
+                        } else {
+                            rollTable(connection, chosenTable, "name");
+                        }
+                    } else if (user_input.toLowerCase().trim().equals("100") || user_input.toLowerCase().trim().equals("back")) {
+                        break; // Go back to the category selection
+                    } else {
+                        System.out.println("Please enter a valid option");
+                    }
+                }
+            } else if (user_input.toLowerCase().trim().equals("100") || user_input.toLowerCase().trim().equals("exit")) {
+                break; // Exit the program
             } else {
                 System.out.println("Please select from a valid option");
             }
         }
+
 
 
         connection.close();
