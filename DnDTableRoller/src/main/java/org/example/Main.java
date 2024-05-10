@@ -5,6 +5,7 @@ import org.example.domain.Category;
 import org.example.domain.Subcategory;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -24,6 +25,15 @@ public class Main {
         Connection connection = DriverManager.getConnection(DB_URL, USER, PASS);
         connection.setAutoCommit(true);
 
+        //TODO fix magic_items, currently rolls as "magic"
+        //TODO tables to add
+        //CIVILIZATION//Castles and Keeps//Churches//Cities//Town events//Villages//graveyards
+        //WILDERNESS //Travel setbacks
+        //CHARACTERS//Adventurers//Arcane (npcs)//BBEG//monsters//nobles//priests//random npcs//villagers
+        //ENCHANTMENTS//blessings//curses//Divinations and fortunes
+        //FLAVOR//melee combat//nightmares//spell casting//potions
+
+
         //------------START PROGRAM-------------
         // Populate our subcategories to our categories
         for(Category category : getCategories(connection)){
@@ -36,11 +46,18 @@ public class Main {
             //TODO add logic to give options for every subcategory
             //TODO add logic to roll tables like Items without printing to console
             // Print categories
+            // put consoleStartApp into own controller/services
             System.out.println("What Category would you like to select?");
             for (Category category : getCategories(connection)){
                 System.out.println(category.getCategory_id() + ". " + category.getCategory_name());
             }
             System.out.println("100. Exit");
+
+            //create a list of all Categories to check against the user's selection
+            List<Integer> existCategory = new ArrayList<>();
+            for (Category category : getCategories(connection)){
+                existCategory.add(category.getCategory_id());
+            }
 
             String user_input = scanner.nextLine();
             int user_num = 0;
@@ -53,17 +70,24 @@ public class Main {
                 e.printStackTrace();
             }
 
-            if (user_num > 0 && user_num != 100) {
+            if (existCategory.contains(user_num)  && user_num != 100) {
                 categoryChosen = getCategory(connection, user_num);
 
                 // Loop for subcategories
                 while (true) {
+
                     System.out.println("You selected " + categoryChosen.getCategory_name() + "\n Please Select from the following tables:");
                     List<Subcategory> subcategories = categoryChosen.getSubcategories();
                     for (Subcategory subcategory : subcategories) {
                         System.out.println("\t" + subcategory.getId() + ". " + subcategory.getName());
                     }
                     System.out.println("100. Back");
+
+                    //create a list of possible subcategories to check against user input
+                    List<Integer> existSubcategory = new ArrayList<>();
+                    for (Subcategory subcategory : subcategories){
+                        existSubcategory.add(subcategory.getId());
+                    }
 
                     // Ask user which subcategory they want
                     user_input = scanner.nextLine();
@@ -75,7 +99,7 @@ public class Main {
                         e.printStackTrace();
                     }
 
-                    if (user_num > 0 && user_num != 100) {
+                    if (existSubcategory.contains(user_num) && user_num != 100) {
                         Subcategory subcategory = getSubcategory(connection, user_num);
                         String chosenTable = getSubcategoryTable(subcategory);
 
