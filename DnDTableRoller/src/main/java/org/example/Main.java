@@ -104,18 +104,16 @@ public class Main {
 
                         if (subcategory.getCategory_id() == 2) {
                             rollWilderness(connection, chosenTable);
-                        } else if(subcategory.getCategory_id() == 1 && !chosenTable.equals("town")) {
+                        } else if(subcategory.getCategory_id() == 1 && !chosenTable.equals("events")) {
                             rollCivilization(connection, chosenTable);
                         } else if (chosenTable.equals("potions")) {
                             rollPotions(connection);
-                        } else if (chosenTable.equals("magic")){ //(subcategory.getId() == 29) {
-                            //TODO BUG we want it to equal magic_items not magic when checking, but still returns "magic"
+                        } else if (chosenTable.equals("magicitems")){ //(subcategory.getId() == 29) {
                             rollMagicItems(connection);
-                        }else if (chosenTable.equals("town")){ //(subcategory.getId() == 4) {
-                            //TODO BUG we want it to equal town_events not town when checking, but still returns "town"
+                        } else if (chosenTable.equals("events")){ //(subcategory.getId() == 4) {
                             rollTownEvent(connection);
                         } else {
-                            rollTable(connection, chosenTable, "name");
+                            rollTable(connection, chosenTable);
                         }
                     } else if (user_input.toLowerCase().trim().equals("100") || user_input.toLowerCase().trim().equals("back")) {
                         break; // Go back to the category selection

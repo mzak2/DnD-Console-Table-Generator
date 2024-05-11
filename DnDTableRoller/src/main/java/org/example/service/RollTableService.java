@@ -3,10 +3,7 @@ package org.example.service;
 import org.example.domain.Category;
 import org.example.domain.Subcategory;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -14,9 +11,9 @@ import java.util.Random;
 public class RollTableService {
 
     public static String rollTownEvent(Connection connection) throws SQLException{
-        String event = rollTable(connection, "town_events", "description");
-        String person_1 = rollTable(connection, "rng_npcs", "description");
-        String person_2 = rollTable(connection, "rng_npcs", "description");
+        String event = rollTable(connection, "events");
+        String person_1 = rollTable(connection, "npcs");
+        String person_2 = rollTable(connection, "npcs");
 
         StringBuilder sb = new StringBuilder();
 
@@ -32,8 +29,8 @@ public class RollTableService {
     }
 
     public static String rollPotions(Connection connection) throws SQLException {
-        String effect = rollTable(connection, "potions", "description");
-        String duration = rollTable(connection, "durations", "description");
+        String effect = rollTable(connection, "potions");
+        String duration = rollTable(connection, "durations");
 
         StringBuilder sb = new StringBuilder();
         sb.append("The Potion's effect is:\n");
@@ -46,8 +43,8 @@ public class RollTableService {
     }
 
     public static String rollMagicItems(Connection connection) throws SQLException{
-        String description = rollTable(connection, "magic_items", "description");
-        String equipmentType = rollTable(connection, "equipment", "name");
+        String description = rollTable(connection, "magicitems");
+        String equipmentType = rollTable(connection, "equipment");
 
         StringBuilder sb = new StringBuilder();
         sb.append("You find a:\n");
@@ -63,17 +60,17 @@ public class RollTableService {
         //description placeholders
         String terrain = "Location"; //rollTable(connection, "terrain", "description");
         String purpose = "Purpose in town";//rollTable(connection, "purpose", "description");
-        String adjective = rollTable(connection, "adjectives", "name");
+        String adjective = rollTable(connection, "adjectives");
 
         //pulled from the respective wilderness table i.e. deserts
-        String location_description = rollTable(connection, table, "description");
+        String location_description = rollTable(connection, table);
         String table_minus_s = table.substring(0, table.length() - 1);
 
-        String item = rollTable(connection, "items", "name");
-        String item_2 = rollTable(connection, "items", "name");
-        String item_3 = rollTable(connection, "items", "name");
-        String item_4 = rollTable(connection, "items", "name");
-        String item_5 = rollTable(connection, "items", "name");
+        String item = rollTable(connection, "items");
+        String item_2 = rollTable(connection, "items");
+        String item_3 = rollTable(connection, "items");
+        String item_4 = rollTable(connection, "items");
+        String item_5 = rollTable(connection, "items");
 
         //string output of the description
         StringBuilder sb = new StringBuilder();
@@ -98,19 +95,19 @@ public class RollTableService {
 
     public static String rollWilderness(Connection connection, String table) throws SQLException {
         //description placeholders
-        String terrain = rollTable(connection, "terrain", "description");
-        String purpose = rollTable(connection, "purpose", "description");
-        String adjective = rollTable(connection, "adjectives", "name");
+        String terrain = rollTable(connection, "terrain");
+        String purpose = rollTable(connection, "purpose");
+        String adjective = rollTable(connection, "adjectives");
 
         //pulled from the respective wilderness table i.e. deserts
-        String location_description = rollTable(connection, table, "description");
+        String location_description = rollTable(connection, table);
         String table_minus_s = table.substring(0, table.length() - 1);
 
-        String item = rollTable(connection, "items", "name");
-        String item_2 = rollTable(connection, "items", "name");
-        String item_3 = rollTable(connection, "items", "name");
-        String item_4 = rollTable(connection, "items", "name");
-        String item_5 = rollTable(connection, "items", "name");
+        String item = rollTable(connection, "items");
+        String item_2 = rollTable(connection, "items");
+        String item_3 = rollTable(connection, "items");
+        String item_4 = rollTable(connection, "items");
+        String item_5 = rollTable(connection, "items");
 
         //string output of the description
         StringBuilder sb = new StringBuilder();
@@ -133,20 +130,36 @@ public class RollTableService {
         return sb.toString();
     }
 
-    public static String rollTable(Connection connection, String table, String column) throws SQLException {
+    public static String rollTable(Connection connection, String table) throws SQLException {
         int maxTableId = getMaxId(connection, table, "id");
         String result = "";
 
         Random random = new Random();
         int roll = random.nextInt(1, maxTableId);
         Statement statement = connection.createStatement();
-        ResultSet rs = statement.executeQuery("SELECT " + column + " FROM " + table + " WHERE id = " + roll);
+        ResultSet rs = statement.executeQuery("SELECT * FROM " + table + " WHERE id = " + roll);
+
+        ResultSetMetaData metaData = rs.getMetaData();
+        int columnCount = metaData.getColumnCount();
+        String columnName = null;
+
+        for(int i = 1; i <= columnCount; i++){
+            if("name".equalsIgnoreCase(metaData.getColumnName(i)) || "description".equalsIgnoreCase(metaData.getColumnName(i))){
+                columnName = metaData.getColumnName(i);
+                break;
+            }
+        }
+
+        if(columnName ==null){
+            System.out.println("Could not find a 'name' or 'description' column name");
+            return result;
+        }
 
         if(!rs.next()){
             System.out.println("The roll result was out of bounds of the table id");
         } else {
             do{
-                result = rs.getString(column);
+                result = rs.getString(columnName);
                 System.out.println(table + ": " + result);
             } while (rs.next());
         }

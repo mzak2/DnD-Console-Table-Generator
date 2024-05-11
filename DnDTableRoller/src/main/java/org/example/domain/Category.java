@@ -52,7 +52,7 @@ public class Category {
         }
 
         Statement statement = connection.createStatement();
-        ResultSet rs = statement.executeQuery("SELECT * FROM sub_categories WHERE category_id = " + category_id);
+        ResultSet rs = statement.executeQuery("SELECT * FROM sub_categories WHERE category_id = " + category_id + " ORDER BY id");
 
         if (!rs.next()) {
             System.out.println("No subcategories found for category: " + category_name);
